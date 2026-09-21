@@ -1,0 +1,30 @@
+{
+  "name": "DeepSeek-Harness-Video-Tools",
+  "version": "1.0.0",
+  "description": "Unofficial community plugin for DeepSeek Harness: generate_video / check_video tools backed by a local ComfyUI + MiniMax H3 deployment. Async two-call shape; no cloud, no API key.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "author": "tonyd2wild <tonyd615@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tonyd2wild/DeepSeek-Harness-Video-Tools.git"
+  },
+  "keywords": [
+    "deepseek",
+    "dsh",
+    "deepseek-harness",
+    "video-generation",
+    "text-to-video",
+    "comfyui",
+    "minimax-h3",
+    "local-ai",
+    "plugin"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6"
+  }
+}
