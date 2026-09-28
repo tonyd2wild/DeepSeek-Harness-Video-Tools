@@ -1,8 +1,10 @@
 # DeepSeek-Harness-Video-Tools
 
-> ⚠️ **Unofficial community project.** Not affiliated with or endorsed by DeepSeek or MiniMax. Community tooling for the [DeepSeek Harness](https://github.com/tonyd2wild) (`dsh`) agent harness.
+> ⚠️ **Unofficial community project.** Not affiliated with or endorsed by DeepSeek or MiniMax. Community tooling for the [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (`dsh`) agent harness.
 >
 > 🔒 **Security note:** this tool has no authentication of its own and talks to your ComfyUI endpoint in plain HTTP. Keep both on `127.0.0.1` or inside a trusted network (Tailscale/WireGuard), and never expose them directly to the internet.
+
+> **Requires dsh 0.2.0-rc.1 or newer** (web UI and desktop app). On dsh 0.1.x, use the [`dsh-0.1` tag](https://github.com/tonyd2wild/DeepSeek-Harness-Video-Tools/tree/dsh-0.1).
 
 Model-facing **`generate_video`** and **`check_video`** tools for DeepSeek Harness, backed by **your own local ComfyUI + MiniMax H3 deployment** — the model makes the audio too. No cloud, no API key, no per-minute billing.
 
@@ -64,38 +66,60 @@ Measured rules that matter:
 
 ## Requirements
 
-- Node ≥ 18, a running dsh install
+- **dsh 0.2.0-rc.1 or newer**, in the web UI (profile `web`) and/or DeepSeek's desktop app (profile `desktop`). npm's `latest` tag still points at 0.1.x at the time of writing, so install with `npm i -g @deepseek-ai/dsh@next`
+- **Using dsh 0.1.x?** Use the [`dsh-0.1` tag](https://github.com/tonyd2wild/DeepSeek-Harness-Video-Tools/tree/dsh-0.1) of this repo; its install steps (`agent.cordis.yml` preset folders) do not apply to 0.2
+- **Node** `^22.19.0 || >=24.0.0` (what dsh 0.2 needs) and **pnpm** (`dsh plugin` shells out to it)
 - **ComfyUI** with a MiniMax H3 checkpoint, reachable over HTTP
 
 ## Install
 
+On dsh 0.2 all configuration lives in `$DSH_HOME/profiles/<profile>/cordis.patch.yml`
+(default `$DSH_HOME` is `~/.dsh`). Repeat steps 3 to 5 for each profile you use:
+`web`, `desktop`, or both.
+
 ```bash
 # 1. clone next to your other plugins
 git clone https://github.com/tonyd2wild/DeepSeek-Harness-Video-Tools.git ~/.dsh/plugins/video-tools
+cd ~/.dsh/plugins/video-tools
 
-# 2. install its one dependency
-cd ~/.dsh/plugins/video-tools && npm install --ignore-scripts
+# 2. link the harness's OWN @deepseek-ai/dsh-tools, so the tools are built with the exact copy your dsh runs
+npm pkg set "dependencies.@deepseek-ai/dsh-tools=link:$(npm root -g)/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-tools"
+pnpm install --ignore-scripts
 
-# 3. wire it into dsh (host plane)
-dsh plugin --profile <your-profile> add link:~/.dsh/plugins/video-tools
-#    then add a loader row to your profile's cordis.patch.yml:
-#    - id: dsh-plugin-video-tools
-#      name: 'dsh-plugin-video-tools'
-
-# 4. add the agent-plane row to your preset's agent.cordis.yml:
-#    - id: tool-video-gen
-#      name: 'dsh-plugin-video-tools'
-#      config:
-#        lanes:      ["http://127.0.0.1:8188", "http://127.0.0.1:8189"]
-#        imageLanes: ["http://127.0.0.1:8190", "http://127.0.0.1:8191"]
-#        outDir:     "/absolute/writeable/output/dir"
-
-# 5. create a NEW session (presets mount lazily; a running session keeps its old catalog)
+# 3. install it into the profile (never into the dsh install's node_modules)
+dsh plugin --profile web     add link:/absolute/path/to/.dsh/plugins/video-tools
+dsh plugin --profile desktop add link:/absolute/path/to/.dsh/plugins/video-tools
 ```
+
+**4. Add the tools to your agent preset** in that profile's `cordis.patch.yml`.
+The row is referenced by the package's name, `DeepSeek-Harness-Video-Tools`:
+
+```yaml
+          - id: tool-video-gen
+            name: 'DeepSeek-Harness-Video-Tools'
+            config:
+              lanes:      ["http://127.0.0.1:8188", "http://127.0.0.1:8189"]
+              imageLanes: ["http://127.0.0.1:8190", "http://127.0.0.1:8191"]
+              outDir:     /absolute/writeable/output/dir
+```
+
+On 0.2 a preset is an `@deepseek-ai/dsh-agent-preset` row. You cannot append a
+tool to the shipped `standard` preset (a patch replaces a row's whole config), so
+the tool row goes into a preset row of your own that copies the shipped plugin
+list, made default through the `agent-preset-registry` row. If another community
+tool already gave you such a row, append `tool-video-gen` to it. Otherwise start
+from the hub's
+[one-preset-for-all-tools example](https://github.com/tonyd2wild/DeepSeek-Harness-Tools/blob/main/examples/cordis.patch.yml)
+and uncomment the Video Tools row.
+
+**5. Restart dsh** (web UI: stop and re-run `dsh web`; desktop app: quit fully
+and reopen), then create a **new** session: presets mount lazily, and a running
+session keeps its old tool catalog.
 
 ## Configuration
 
-All fleet specifics live in config — nothing about our hardware is hardcoded:
+All fleet specifics live in the tool row's `config:`, nothing about our hardware
+is hardcoded ([config.example.json](config.example.json) shows the keys):
 
 | key | default | meaning |
 |---|---|---|
