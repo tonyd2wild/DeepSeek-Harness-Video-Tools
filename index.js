@@ -51,6 +51,16 @@ const DEFAULTS = {
   },
 }
 
+/** Cordis plugin name used by loader diagnostics. */
+export const name = 'dsh-plugin-video-tools'
+
+/**
+ * The model-facing tool registry these tools register into. Required: under
+ * dsh 0.2 (cordis 4) reading ctx.tools without declaring it here throws
+ * `cannot get property "tools" without inject` and the plugin fails to mount.
+ */
+export const inject = ['tools']
+
 /** Per-call HTTP timeouts. */
 const REQUEST_TIMEOUT_MS = 30_000
 /** Video jobs are minutes long; poll gently. */

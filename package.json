@@ -22,9 +22,9 @@
     "plugin"
   ],
   "engines": {
-    "node": ">=18"
+    "node": "^22.19.0 || >=24.0.0"
   },
   "dependencies": {
-    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6"
+    "@deepseek-ai/dsh-tools": "^0.2.0-rc.1"
   }
 }

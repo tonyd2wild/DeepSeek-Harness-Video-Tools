@@ -5,6 +5,7 @@
 > 🔒 **Security note:** this tool has no authentication of its own and talks to your ComfyUI endpoint in plain HTTP. Keep both on `127.0.0.1` or inside a trusted network (Tailscale/WireGuard), and never expose them directly to the internet.
 
 > **Requires dsh 0.2.0-rc.1 or newer** (web UI and desktop app). On dsh 0.1.x, use the [`dsh-0.1` tag](https://github.com/tonyd2wild/DeepSeek-Harness-Video-Tools/tree/dsh-0.1).
+> DeepSeek's desktop app has no public download yet; it is built from [DeepSeek's source](https://github.com/deepseek-ai/deepseek-harness).
 
 Model-facing **`generate_video`** and **`check_video`** tools for DeepSeek Harness, backed by **your own local ComfyUI + MiniMax H3 deployment** — the model makes the audio too. No cloud, no API key, no per-minute billing.
 
@@ -82,8 +83,8 @@ On dsh 0.2 all configuration lives in `$DSH_HOME/profiles/<profile>/cordis.patch
 git clone https://github.com/tonyd2wild/DeepSeek-Harness-Video-Tools.git ~/.dsh/plugins/video-tools
 cd ~/.dsh/plugins/video-tools
 
-# 2. link the harness's OWN @deepseek-ai/dsh-tools, so the tools are built with the exact copy your dsh runs
-npm pkg set "dependencies.@deepseek-ai/dsh-tools=link:$(npm root -g)/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-tools"
+# 2. install its one dependency: @deepseek-ai/dsh-tools, pinned to the dsh 0.2 line
+#    in package.json (npm's `latest` tag for it is an older, broken generation)
 pnpm install --ignore-scripts
 
 # 3. install it into the profile (never into the dsh install's node_modules)
